@@ -29,7 +29,7 @@ terraform {
     key            = "network/terraform.tfstate" # Path to store the state file
     region         = "ap-south-1"                # AWS region
     dynamodb_table = "cvs-tf-environment"        # DynamoDB table for state locking
-    encrypt        = true                        # Enable encryption for the state file
-  }
+
+    }
 }
 
