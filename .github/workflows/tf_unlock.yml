@@ -26,11 +26,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "ap-south-1"
 
-      # Step 3: Install Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0  # Replace with your desired version
+      # # Step 3: Install Terraform
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v2
+      #   with:
+      #     terraform_version: 1.5.0  # Replace with your desired version
 
       # Step 4: Get Lock ID from DynamoDB
       - name: 🔓 Get Lock ID from DynamoDB
