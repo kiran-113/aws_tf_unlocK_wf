@@ -16,14 +16,14 @@ module "s3_bucket_de23" {
   force_destroy  = false
 }
 
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.13.0"
-  cidr = "20.0.0.0/16"
-}
+# module "vpc" {
+#   source  = "terraform-aws-modules/vpc/aws"
+#   version = "5.13.0"
+#   cidr = "20.0.0.0/16"
+# }
 
-module "s3-bucket" {
-  count = 3
-  source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.2.1"
-}
+# module "s3-bucket" {
+#   count = 3
+#   source  = "terraform-aws-modules/s3-bucket/aws"
+#   version = "4.2.1"
+# }
