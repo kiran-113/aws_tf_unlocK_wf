@@ -54,7 +54,7 @@ jobs:
       - name: 🔓 Unlock Terraform State
         if: env.LOCK_ID != 'none'
         run: |
-          terraform init -reconfigure
+          terraform init
           terraform force-unlock -force ${{ env.LOCK_ID }}
 
       # Step 6: Notify if no lock ID is found
