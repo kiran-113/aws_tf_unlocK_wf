@@ -54,12 +54,6 @@ jobs:
       - name: 🔓 Unlock Terraform State
         if: env.LOCK_ID != 'none'
         run: |
-          terraform init -upgrade \
-            -backend-config="bucket=newtest-14528" \
-            -backend-config="key=network/terraform.tfstate" \
-            -backend-config="region=ap-south-1" \
-            -backend-config="dynamodb_table=cvs-tf-environment" \
-            -backend-config="encrypt=true" \
           terraform force-unlock -force ${{ env.LOCK_ID }}
 
       # Step 6: Notify if no lock ID is found
