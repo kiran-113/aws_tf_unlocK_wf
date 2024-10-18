@@ -54,7 +54,7 @@ jobs:
       - name: 🔓 Unlock Terraform State
         if: env.LOCK_ID != 'none'
         run: |
-          terraform init \
+          terraform init -upgrade \
             -backend-config="bucket=newtest-14528" \
             -backend-config="key=network/terraform.tfstate" \
             -backend-config="region=ap-south-1" \
