@@ -15,10 +15,21 @@ provider "aws" {
   region     = "us-east-1"
 }
 
+# terraform {
+#   backend "s3" {
+#     bucket = "newtest-14528"
+#     key    = "network/terraform.tfstate"
+#     region = "ap-south-1"
+#   }
+# }
+
 terraform {
   backend "s3" {
-    bucket = "newtest-14528"
-    key    = "network/terraform.tfstate"
-    region = "ap-south-1"
+    bucket         = "newtest-14528"             # S3 bucket name
+    key            = "network/terraform.tfstate" # Path to store the state file
+    region         = "ap-south-1"                # AWS region
+    dynamodb_table = "cvs-tf-environment"        # DynamoDB table for state locking
+    encrypt        = true                        # Enable encryption for the state file
+    lock_table_key = "dev"                       # Key used to lock state in DynamoDB
   }
 }
