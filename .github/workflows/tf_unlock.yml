@@ -37,7 +37,7 @@ jobs:
         id: get-lock-id
         run: |
           lock_id=$(aws dynamodb get-item --table-name cvs-tf-environment \
-            --key '{"LockID":{"S": "cvs-tf-environment/env:/${{ github.event.inputs.environment_name }}/tf_state"}}' \
+            --key '{"LockID":{"S": "cvs-tf-environment/env:'${{ github.event.inputs.environment_name }}'/tf_state"}}' \
             --attributes-to-get Info \
             | jq -r '.[].Info.S | fromjson | .ID')
 
@@ -49,9 +49,8 @@ jobs:
             echo "LOCK_ID=$lock_id" >> $GITHUB_ENV
           fi
 
-      # Conditional unlock if Lock ID is found
-      - name: 🔓 Unlock Terraform State
-        if: env.LOCK_ID != 'none'
+      # Initialize Terraform (This step can be moved to before the unlock step)
+      - name: Initialize Terraform
         run: |
           terraform init \
             -backend-config="bucket=newtest-14528" \
@@ -60,6 +59,11 @@ jobs:
             -backend-config="dynamodb_table=cvs-tf-environment" \
             -backend-config="encrypt=true" \
             -backend-config="lock_table_key=dev"
+
+      # Conditional unlock if Lock ID is found
+      - name: 🔓 Unlock Terraform State
+        if: env.LOCK_ID != 'none'
+        run: |
           terraform force-unlock -force $LOCK_ID
 
       # Notify if no lock ID is found
@@ -67,3 +71,74 @@ jobs:
         if: env.LOCK_ID == 'none'
         run: |
           echo "No lock ID found, skipping unlock process."
+
+
+# name: "Manual Terraform State Unlock"
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       environment_name:
+#         description: "Enter the environment name"
+#         required: true
+#         type: string
+
+# jobs:
+#   unlock_state:
+#     name: "Unlock Terraform State"
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout the repository
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       # Set up AWS CLI
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v3
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: "us-east-1"
+
+#       # Install Terraform using hashicorp/setup-terraform@v2
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v2
+#         with:
+#           terraform_version: 1.5.0  # Replace with your desired version
+
+#       # Query DynamoDB for Lock ID and set it as an environment variable
+#       - name: 🔓 Get Lock ID from DynamoDB
+#         id: get-lock-id
+#         run: |
+#           lock_id=$(aws dynamodb get-item --table-name cvs-tf-environment \
+#             --key '{"LockID":{"S": "cvs-tf-environment/env:/${{ github.event.inputs.environment_name }}/tf_state"}}' \
+#             --attributes-to-get Info \
+#             | jq -r '.[].Info.S | fromjson | .ID')
+
+#           if [ -z "$lock_id" ]; then
+#             echo "No lock ID found"
+#             echo "LOCK_ID=none" >> $GITHUB_ENV
+#           else
+#             echo "Lock ID found: $lock_id"
+#             echo "LOCK_ID=$lock_id" >> $GITHUB_ENV
+#           fi
+
+#       # Conditional unlock if Lock ID is found
+#       - name: 🔓 Unlock Terraform State
+#         if: env.LOCK_ID != 'none'
+#         run: |
+#           terraform init \
+#             -backend-config="bucket=newtest-14528" \
+#             -backend-config="key=network/terraform.tfstate" \
+#             -backend-config="region=ap-south-1" \
+#             -backend-config="dynamodb_table=cvs-tf-environment" \
+#             -backend-config="encrypt=true" \
+#             -backend-config="lock_table_key=dev"
+#           terraform force-unlock -force $LOCK_ID
+
+#       # Notify if no lock ID is found
+#       - name: 🚨 No Lock ID Found
+#         if: env.LOCK_ID == 'none'
+#         run: |
+#           echo "No lock ID found, skipping unlock process."
